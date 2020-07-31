@@ -2,7 +2,7 @@ const axios = require('axios')
 const Table = require('cli-table3')
 const { format } = require('date-fns')
 const drawInIterm = require('iterm2-image')
-const url = `https://web-api.juejin.im/query`
+const url = `https://apinew.juejin.im/recommend_api/v1/short_msg/recommend`
 
 let list = []
 // 请求数据
@@ -10,10 +10,10 @@ async function getListData() {
     const resp = await axios.post(
         url,
         {
-            operationName: '',
-            query: '',
-            variables: { size: 20, after: '', afterPosition: '' },
-            extensions: { query: { id: '249431a8e4d85e459f6c29eb808e76d0' } },
+            id_type: 4,
+            sort_type: 300,
+            cursor: '0',
+            limit: 20,
         },
         {
             headers: {
@@ -24,36 +24,28 @@ async function getListData() {
             },
         }
     )
-
-    if (resp.data.data.recommendedActivityFeed.items) {
-        const data = resp.data.data.recommendedActivityFeed.items
-        if (data.edges) {
-            const dataList = data.edges.map((item) => {
-                return {
-                    username: item.node.actors[0].username,
-                    avatar: item.node.actors[0].avatarLarge,
-                    content: item.node.targets[0].content,
-                    time: item.node.targets[0].updatedAt,
-                    pictures: item.node.targets[0].pictures,
-                }
-            })
-            list = list.concat(dataList)
-        }
-        if (data.pageInfo) {
-            ;(hasNext = data.pageInfo.hasNextPage), (endCursor = data.pageInfo.endCursor)
-        }
+    if (resp.data.data.length > 0) {
+        const data = resp.data.data
+        const dataList = data.map((item) => {
+            return {
+                username: item.author_user_info.user_name,
+                avatar: item.author_user_info.avatar_large,
+                content: item.msg_Info.content,
+                pictures: item.msg_Info.pic_list,
+            }
+        })
+        list = list.concat(dataList)
     }
 }
 
 function createTable() {
     const table = new Table({
-        head: ['用户昵称', '沸点内容', '最后更新时间'],
-        colWidths: [30, 140, 30],
+        head: ['用户昵称', '沸点内容'],
+        colWidths: [30, 160],
     })
     if (list.length > 0) {
         for (const item of list) {
-            const time = format(new Date(item.time), 'yyyy-MM-dd HH:mm:ss')
-            table.push([item.username, item.content, time])
+            table.push([item.username, item.content])
         }
     }
     console.log(table.toString())
