@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "cli-table3": "^0.6.0",
     "date-fns": "^2.15.0",
     "iterm2-image": "^1.0.1"
